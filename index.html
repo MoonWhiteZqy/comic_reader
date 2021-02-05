@@ -5,7 +5,8 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';style-src 'unsafe-inline'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <script src='./jquery-3.5.1.js'></script>
+    <!-- <script src='./jquery-3.5.1.js'></script> -->
+    <script>window.$ = window.jQuery = require('./jquery-3.5.1.js')</script>
     <title>Hello World!</title>
     <style type="text/css">
     .comic_list {
@@ -37,6 +38,8 @@
   <body>
     <div class="comic_list">
       <span>漫画列表</span>
+      <br>
+      <span id='file_name'>拖动文件夹</span>
       <table border="3px" cellpadding='0' cellspacing='0' style="height: 100%;left: 100px;position: absolute;top: 0px;" id='division_table_w' class="division"></table>
     </div>
 
@@ -47,7 +50,7 @@
       and Electron <span id="electron-version"></span>.
       <br>
       <span>Now open your comic folder</span>
-      <button>打开文件夹</button>
+      <button onclick="read_file()">打开文件夹</button>
     </div>
 
     <!-- You can also require other files to run in this process -->
@@ -98,6 +101,7 @@
         )
       }
     }
+
 
   </script>
 </html>
