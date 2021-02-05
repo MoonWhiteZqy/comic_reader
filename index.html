@@ -3,17 +3,97 @@
   <head>
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';style-src 'unsafe-inline'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <script src='./jquery-3.5.1.js'></script>
     <title>Hello World!</title>
+    <style type="text/css">
+    .comic_list {
+      color:black;
+      width: 100px;
+      position: absolute;
+      left: 0px;
+      background-color: beige;
+      height: 100%;
+    }
+    .comic_content{
+      color: aquamarine;
+      position: absolute;
+      left: 100px;
+    }
+    table.division{
+      border-left-style: solid;
+      border-right-style: none;
+      border-top-style: none;
+      border-bottom-style: none;
+      color: beige;
+      border-color: beige;
+    }
+    table.division:hover{
+      cursor:w-resize
+    }
+    </style>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
+    <div class="comic_list">
+      <span>漫画列表</span>
+      <table border="3px" cellpadding='0' cellspacing='0' style="height: 100%;left: 100px;position: absolute;top: 0px;" id='dr' class="division"></table>
+    </div>
+
+    <div class="comic_content">
+      <h1>Hello World!</h1>
+      We are using Node.js <span id="node-version"></span>,
+      Chromium <span id="chrome-version"></span>,
+      and Electron <span id="electron-version"></span>.
+      <br>
+      <span>Now open your comic folder</span>
+    </div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
   </body>
+  <script>
+    $(function(){bindResize($('#dr'))});
+    function bindResize(el){
+      let els = el.style;
+      // let x = 0;
+      // let y = 0;
+      $(el).mousedown(function(e){
+        // x = e.clientX - el.offsetWidth;
+        // y = e.clientY - el.offsetHeight;
+        el.setCapture ? (
+          el.setCapture(),
+          el.onmousemove = function(ev){
+            mouseMove(ev || event)
+          },
+          el.onmouseup = mouseUp
+        ):(
+          $(document).bind('mousemove', mouseMove).bind('mouseup', mouseUp)
+        )
+        e.preventDefault()
+      });
+      function mouseMove(e){
+        let x = e.clientX;
+        if(e.clientX < 80){
+          x = 80; 
+        }
+        else if(e.clientX > 200){
+          x = 200;
+        }
+        $('.comic_list').width(x);
+        $('.comic_content').offset({left:x});
+        $('#dr').offset({left:x});
+        // els.width = e.clientX - x + 'px';
+        // els.height = e.clientY - y + 'px';
+      }
+      function mouseUp(){
+        el.releaseCapture ? (
+          el.releaseCapture(),
+          el.onmousemove = el.onmouseup = null
+        ) : (
+          $(document).unbind("mousemove", mouseMove).unbind('mouseup', mouseUp)
+        )
+      }
+    }
+  </script>
 </html>
