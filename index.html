@@ -53,14 +53,13 @@
     <script src="./renderer.js"></script>
   </body>
   <script>
+    // 添加鼠标绑定事件，拖动改变模块大小
     $(function(){bindResize($('#dr'))});
+
     function bindResize(el){
       let els = el.style;
-      // let x = 0;
-      // let y = 0;
       $(el).mousedown(function(e){
-        // x = e.clientX - el.offsetWidth;
-        // y = e.clientY - el.offsetHeight;
+        // 鼠标事件捕获
         el.setCapture ? (
           el.setCapture(),
           el.onmousemove = function(ev){
@@ -72,20 +71,23 @@
         )
         e.preventDefault()
       });
+      // 实现鼠标拖动的功能
       function mouseMove(e){
+        // 获取当前鼠标在窗口内的横坐标位置
         let x = e.clientX;
+        // 控制位置范围
         if(e.clientX < 80){
           x = 80; 
         }
         else if(e.clientX > 200){
           x = 200;
         }
+        // 更改相关模块的大小
         $('.comic_list').width(x);
         $('.comic_content').offset({left:x});
         $('#dr').offset({left:x});
-        // els.width = e.clientX - x + 'px';
-        // els.height = e.clientY - y + 'px';
       }
+      // 鼠标放开，删除注册事件
       function mouseUp(){
         el.releaseCapture ? (
           el.releaseCapture(),
