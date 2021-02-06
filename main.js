@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain, dialog} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog, screen} = require('electron')
 const path = require('path')
 
 function createWindow () {
@@ -7,6 +7,11 @@ function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    show:false,
+    // width:screen.getPrimaryDisplay().workAreaSize.width,
+    // height:screen.getPrimaryDisplay().workAreaSize.height,
+    // fullscreen:true,
+    // frame:false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration:true
@@ -15,6 +20,8 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
+  mainWindow.maximize();
+  mainWindow.show();
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
