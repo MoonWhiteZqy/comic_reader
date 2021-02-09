@@ -13,7 +13,7 @@ const {ipcRenderer} = require('electron')
 //     })
 // }
 
-
+// 初始化css
 initMyUI = function(){
     let leftPx = 160;
     $('.comic_content').offset({left:leftPx + 5});
@@ -59,6 +59,7 @@ let getLastName = function(name){
 let stopSlide = function(next){
     $('#comic_slide').carousel('pause');
     let i;
+    // 找到当前激活的漫画位置
     for(i = 0; i < app.currentComics.length; i++){
         if(app.currentComics[i].isactive){
             break;
@@ -71,11 +72,12 @@ let stopSlide = function(next){
     app.currentComics[i + next].isactive = true;
 }
 
+// 添加左侧的漫画章节文件夹
 let appendFolder = function(files){
+    // 基础文件夹路径
     let base = app.comicTitles[comicCount]['ospath'] + '\\';
     let folderList = [];
     for(let i = 0; i < files.length; i++){
-        // app.comicTitles[comicCount]['chapters'].push(files[i]);
         fs.stat(base + files[i], function(err, data){
             if(err){
                 console.log(err);
@@ -93,6 +95,7 @@ let appendFolder = function(files){
 let comicCount = 0;
 let e;
 
+// 不知道为什么sort失效
 let sortByIndex = function(a, b){
     if(a.length < b.length){
         return a < b;
@@ -102,6 +105,7 @@ let sortByIndex = function(a, b){
     }
 }
 
+// 通过哈希，将文件名重新排序，返回正确的序列
 let sortByHash = function(Names){
     let id_name = {};
     let res = [];
@@ -120,7 +124,9 @@ let sortByHash = function(Names){
 let app = new Vue({
     el:'#app',
     data:{
+        // 存储打开漫画的整体信息，包括名称、章节等等
         comicTitles:[],
+        // 展示漫画的src来源
         currentComics:[]
     },
     methods:{
@@ -140,11 +146,9 @@ let app = new Vue({
                 appendFolder(filedirs);
                 app.comicTitles[comicCount]['chapters'].sort(function(a,b){return a.time - b.time;})
                 comicCount++;
-                // for(let i = 0; i < files.length; i++){
-                //     app.comicFolders.push(files[i]);
-                // }
             })
         },
+        // 按照创建时间对章节名进行排序，似乎会有异步问题出现导致sort失效
         sortByTime:function(index, sorted){
             if(sorted){
                 return ;
@@ -153,6 +157,7 @@ let app = new Vue({
             app.comicTitles[index]['sorted'] = true;
             console.log('sorted');
         },
+        // 读取章节文件夹里的jpg名称，用于填充漫画src
         readChapter:function(chapterPath, isdir){
             let comicPaths = [];
             if(!isdir){
@@ -167,14 +172,14 @@ let app = new Vue({
             })
             comicPaths = sortByHash(comicPaths);
             app.setCurrentComic(chapterPath, comicPaths);
-
-
         },
         setCurrentComic:function(chapterPath, comicFileNames){
             app.currentComics = [];
             for(let i = 0; i < comicFileNames.length; i++){
+                // 需要在添加时确定active属性，用于适配bootsreap的轮播组件
                 app.currentComics.push({path:chapterPath + '\\' + comicFileNames[i], isactive:false});
             }
+            // 默认第一张漫画为起始
             app.currentComics[0].isactive = true;
         }
     }
