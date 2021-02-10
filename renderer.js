@@ -95,30 +95,11 @@ let appendFolder = function(files){
 let comicCount = 0;
 let e;
 
-// 不知道为什么sort失效
+// 对文件名排序，返回结果不是0、1而是正负数
 let sortByIndex = function(a, b){
-    if(a.length < b.length){
-        return a < b;
-    }
-    else{
-        return (parseInt(a) < parseInt(b));
-    }
+    return parseInt(a) - parseInt(b);
 }
 
-// 通过哈希，将文件名重新排序，返回正确的序列
-let sortByHash = function(Names){
-    let id_name = {};
-    let res = [];
-    for(let i = 0; i < Names.length; i++){
-        let name = Names[i];
-        let mynum = parseInt(name);
-        id_name[mynum] = name;
-    }
-    for(let i = 0; i < Names.length; i++){
-        res.push(id_name[i + 1]);
-    }
-    return res;
-}
 
 
 let app = new Vue({
@@ -155,7 +136,6 @@ let app = new Vue({
             }
             app.comicTitles[index]['chapters'].sort((a, b)=>{return a.time - b.time;});
             app.comicTitles[index]['sorted'] = true;
-            console.log('sorted');
         },
         // 读取章节文件夹里的jpg名称，用于填充漫画src
         readChapter:function(chapterPath, isdir){
@@ -170,7 +150,7 @@ let app = new Vue({
                 let b_num = parseInt(b);
                 return a_num < b_num; 
             })
-            comicPaths = sortByHash(comicPaths);
+            comicPaths.sort(sortByIndex);
             app.setCurrentComic(chapterPath, comicPaths);
         },
         setCurrentComic:function(chapterPath, comicFileNames){
