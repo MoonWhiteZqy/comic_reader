@@ -1,22 +1,18 @@
 const fs = require('fs')
 let Vue = require('./vue.js')
-const {ipcRenderer} = require('electron')
-// console.log(fs)
-// read_file = function(){
-//     fs.readdir('D:/文件/漫画/镇魂街', function(err, files){
-//         if(err){
-//             return console.error(err);
-//         }
-//         files.forEach(function(file){
-//             console.log(file);
-//         })
-//     })
-// }
+const {ipcRenderer} = require('electron');
+const { cursorTo } = require('readline');
+
+
+let comicCount = 0;
+let oldChapterId = undefined;
+let curComic = 0;
+let curChapter = 0;
 
 // 初始化css
 initMyUI = function(){
-    let leftPx = 160;
-    $('.comic_content').offset({left:leftPx + 5});
+    let leftPx = 200;
+    $('.comic_content').offset({left:leftPx});
     $('.comic_list').width(leftPx);
     $('#division_table_w').offset({left:leftPx - 3});
 }
@@ -55,7 +51,20 @@ let getLastName = function(name){
     return resName;
 }
 
-// 用于控制轮播组件的内容,next：前进往下为1，后退为-1
+// 进行章节切换
+let changeChapter = function(direction){
+    let baseComic = app.comicTitles[curComic];
+    let newChapter = curChapter + direction;
+    // 防止超出章节限制
+    if(newChapter < 0 || newChapter >= baseComic.chapters.length){
+        return ;
+    }
+    let nextChapterId = 'comic' + baseComic.index + '_' + newChapter;
+    // 模拟章节的选择
+    app.readChapter(curComic, newChapter, baseComic.chapters[newChapter].isdir, nextChapterId);
+}
+
+// 用于控制轮播组件的内容，进行内容切换,next为1，prev为-1
 let stopSlide = function(next){
     $('#comic_slide').carousel('pause');
     let i;
@@ -65,7 +74,14 @@ let stopSlide = function(next){
             break;
         }
     }
-    if(i + next < 0 || i + next > app.currentComics.length - 1){
+    // 上一页到头，进入上一章节
+    if(i + next < 0){
+        changeChapter(-1);
+        return ;
+    }
+    // 进入下一章节
+    else if(i + next > app.currentComics.length - 1){
+        changeChapter(1);
         return ;
     }
     app.currentComics[i].isactive = false;
@@ -92,8 +108,6 @@ let appendFolder = function(files){
     app.comicTitles[comicCount]['chapters'] = folderList;
 }
 
-let comicCount = 0;
-let e;
 
 // 对文件名排序，返回结果不是0、1而是正负数
 let sortByIndex = function(a, b){
@@ -101,6 +115,17 @@ let sortByIndex = function(a, b){
 }
 
 
+// 改变当前选取的漫画文件夹焦点
+let changeFocus = function(chapterId){
+    if(oldChapterId === undefined){
+        
+    }
+    else{
+        $('#' + oldChapterId).css('background-color', '#f3f3f3');
+    }
+    oldChapterId = chapterId;
+    $('#' + chapterId).css('background-color', '#e4e6f1');
+}
 
 let app = new Vue({
     el:'#app',
@@ -138,20 +163,23 @@ let app = new Vue({
             app.comicTitles[index]['sorted'] = true;
         },
         // 读取章节文件夹里的jpg名称，用于填充漫画src
-        readChapter:function(chapterPath, isdir){
+        readChapter:function(titleIndex, chapterIndex, isdir, curChapterId){
+            // 存储文件的名字
             let comicPaths = [];
+            // 找到当前漫画的基础信息
+            let baseInfo = app.comicTitles[titleIndex];
+            let chapterPath = baseInfo.ospath + '\\' + baseInfo.chapters[chapterIndex].name;
+            curComic = titleIndex;
+            curChapter = chapterIndex;
             if(!isdir){
                 console.log('不是文件夹,打开失败');
                 return ;
             }
             comicPaths = fs.readdirSync(chapterPath);
-            comicPaths.sort((a, b)=>{
-                let a_num = parseInt(a);
-                let b_num = parseInt(b);
-                return a_num < b_num; 
-            })
+            changeFocus(curChapterId)
             comicPaths.sort(sortByIndex);
             app.setCurrentComic(chapterPath, comicPaths);
+            $('#web_title').text('正在阅读:' + baseInfo.name);
         },
         setCurrentComic:function(chapterPath, comicFileNames){
             app.currentComics = [];
