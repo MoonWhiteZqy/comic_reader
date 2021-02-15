@@ -18,12 +18,16 @@ To clone and run this repository you'll need [Git](https://git-scm.com) and [Nod
 ```bash
 # Clone this repository
 git clone https://github.com/MoonWhiteZqy/comic_reader
+
 # Go into the repository
 cd comic_reader
+
 # Install dependencies
 npm install
+
 # Run this app
 electron .
+
 # Release this app
 npm start
 ```

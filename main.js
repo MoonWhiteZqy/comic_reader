@@ -1,10 +1,12 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain, dialog, screen} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog, screen, globalShortcut} = require('electron')
 const path = require('path')
+
+let mainWindow = null;
 
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     show:false,
@@ -32,6 +34,15 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
+
+  // 添加键盘左右方向键控制
+  globalShortcut.register('Right', ()=>{
+    mainWindow.webContents.send('control', 'Right');
+  })
+
+  globalShortcut.register('Left', ()=>{
+    mainWindow.webContents.send('control', 'Left');
+  })
   
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

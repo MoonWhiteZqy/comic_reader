@@ -1,13 +1,14 @@
 const fs = require('fs')
 let Vue = require('./vue.js')
 const {ipcRenderer} = require('electron');
-const { cursorTo } = require('readline');
 
 
 let comicCount = 0;
 let oldChapterId = undefined;
 let curComic = 0;
 let curChapter = 0;
+let comic_chosen = 0;
+let just_slide = 0;
 
 // 初始化css
 initMyUI = function(){
@@ -19,9 +20,35 @@ initMyUI = function(){
 
 initData = function(){
     initMyUI();
+    if(localStorage.length === 0){
+        localStorage.setItem('comics', JSON.stringify({}));
+    }
+    let books = JSON.parse(localStorage['comics']);
+    for(let key in books){
+        app.openBaseFolder(books[key]);
+    }
 }
 
-initData();
+// 注册键盘事件,进行选中图片的切换
+ipcRenderer.on('control', (event, message)=>{
+    if(comic_chosen === 0){
+        console.log('No comic chosen')
+        return ;
+    }
+    // 进行页面切换
+    if(message === 'Right'){
+        just_slide = 0;
+        stopSlide(1);
+    }
+    else if(message === 'Left'){
+        just_slide = 1;
+        stopSlide(-1);
+    }
+    else{
+        console.error('Unknown message by control');
+    }
+})
+
 
 // 打开文件夹窗口功能
 read_file = function(){
@@ -148,14 +175,23 @@ let app = new Vue({
     },
     methods:{
         openBaseFolder:function(path){
+            let comicName = getLastName(path)
+            // 读取存储在本地的记录
+            let logComics = JSON.parse(localStorage['comics']);
             this.comicTitles.push({
-                name:getLastName(path),
+                name:comicName,
                 index:comicCount,
                 ospath:path,
                 chapters:[]
             });
+            logComics[comicName] = path;
+            localStorage['comics'] = JSON.stringify(logComics);
             fs.readdir(path, function(err, filedirs){
                 if(err){
+                    // 打开文件夹失败，删除记录
+                    delete logComics[comicName];
+                    app.comicTitles.pop();
+                    localStorage['comics'] = JSON.stringify(logComics);
                     return console.error(err);
                 }
                 appendFolder(filedirs);
@@ -185,15 +221,24 @@ let app = new Vue({
             comicPaths.sort(sortByIndex);
             app.setCurrentComic(chapterPath, comicPaths);
             $('#web_title').text('正在阅读:' + baseInfo.name);
+            comic_chosen = 1;
         },
         setCurrentComic:function(chapterPath, comicFileNames){
             app.currentComics = [];
-            for(let i = 0; i < comicFileNames.length; i++){
+            let comic_len = comicFileNames.length
+            for(let i = 0; i < comic_len; i++){
                 // 需要在添加时确定active属性，用于适配bootsreap的轮播组件
                 app.currentComics.push({path:chapterPath + '\\' + comicFileNames[i], isactive:false});
             }
             // 默认第一张漫画为起始
-            app.currentComics[0].isactive = true;
+            if(just_slide === 1){
+                app.currentComics[comic_len - 1].isactive = true;
+            }
+            else{
+                app.currentComics[0].isactive = true;
+            }
         }
     }
 })
+
+initData();
