@@ -61,7 +61,7 @@
             <button id='readBtn' onclick="read_file()" class="btn btn-secondary">打开文件夹</button>
             <div v-for='(comicTitle, title_index) in comicTitles'>
               <span :id='comicTitle.name' class="comic_title" data-toggle="collapse" style="background-color: #007acc;" 
-              :data-target="'#comic' + comicTitle.index" @click='sortByTime(comicTitle.index, comicTitle.sorted)'>{{comicTitle.space + comicTitle.name}}</span>
+              :data-target="'#comic' + comicTitle.index" @click='sortByTime(comicTitle.index, comicTitle.sorted)'>{{comicTitle.name}}</span>
               <div :id='"comic" + comicTitle.index' class="collapse hide" :data-parent="'#' + comicTitle.name">
                 <span v-for='(chapter, comic_index) in comicTitle.chapters' :id='"comic" + comicTitle.index + "_" + comic_index'
                 @click='readChapter(title_index, comic_index, chapter.isdir, "comic" + comicTitle.index + "_" + comic_index)'>{{chapter.name}}</span>
@@ -94,6 +94,22 @@
             <!-- <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="sr-only">Next</span> -->
           </a>
+        </div>
+        <!-- 错误弹框 -->
+        <div class="position-fixed bottom-0 right-0 p-3" style="z-index: 5; right: 0; bottom: 0;">
+          <div id="errToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+            <div class="toast-header">
+              <!-- <img src="..." class="rounded mr-2" alt="..."> -->
+              <strong class="mr-auto">错误</strong>
+              <small>刚刚</small>
+              <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="toast-body">
+              当前文件夹已经存在记录.
+            </div>
+          </div>
         </div>
         <!-- <h1>Hello World!</h1>
         We are using Node.js <span id="node-version"></span>,

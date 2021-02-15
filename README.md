@@ -22,7 +22,9 @@ git clone https://github.com/MoonWhiteZqy/comic_reader
 cd comic_reader
 # Install dependencies
 npm install
-# Run the app
+# Run this app
+electron .
+# Release this app
 npm start
 ```
 

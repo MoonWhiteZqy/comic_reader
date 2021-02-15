@@ -17,13 +17,24 @@ initMyUI = function(){
     $('#division_table_w').offset({left:leftPx - 3});
 }
 
-initMyUI();
+initData = function(){
+    initMyUI();
+}
+
+initData();
 
 // 打开文件夹窗口功能
 read_file = function(){
     ipcRenderer.send('open-directory-dialog', 'openDirectory');
     ipcRenderer.once('selectedItem', function(event, path){
         if(path.length > 0){
+            let i;
+            for(i = 0; i < app.comicTitles.length; i++){
+                if(app.comicTitles[i].ospath == path[0]){
+                    $('#errToast').toast('show');
+                    return ;
+                }
+            }
             app.openBaseFolder(path[0]);
         }
         else{
@@ -140,10 +151,8 @@ let app = new Vue({
             this.comicTitles.push({
                 name:getLastName(path),
                 index:comicCount,
-                space:"",
                 ospath:path,
-                chapters:[],
-                sorted:false
+                chapters:[]
             });
             fs.readdir(path, function(err, filedirs){
                 if(err){
@@ -155,12 +164,8 @@ let app = new Vue({
             })
         },
         // 按照创建时间对章节名进行排序，似乎会有异步问题出现导致sort失效
-        sortByTime:function(index, sorted){
-            if(sorted){
-                return ;
-            }
+        sortByTime:function(index){
             app.comicTitles[index]['chapters'].sort((a, b)=>{return a.time - b.time;});
-            app.comicTitles[index]['sorted'] = true;
         },
         // 读取章节文件夹里的jpg名称，用于填充漫画src
         readChapter:function(titleIndex, chapterIndex, isdir, curChapterId){
