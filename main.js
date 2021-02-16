@@ -26,7 +26,7 @@ function createWindow () {
   mainWindow.show();
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -55,6 +55,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
+  mainWindow.webContents.send('close-window', 'save');
   if (process.platform !== 'darwin') app.quit()
 })
 

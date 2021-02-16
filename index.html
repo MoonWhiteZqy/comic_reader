@@ -60,11 +60,11 @@
           <div class="card">
             <button id='readBtn' onclick="read_file()" class="btn btn-secondary">打开文件夹</button>
             <div v-for='(comicTitle, title_index) in comicTitles'>
-              <span :id='comicTitle.name' class="comic_title" data-toggle="collapse" style="background-color: #007acc;" 
+              <span :id='comicTitle.name' class="comic_title" data-toggle="collapse" style="background-color: #fabe19;" 
               :data-target="'#comic' + title_index" @click='sortByTime(title_index, comicTitle.sorted)'>{{comicTitle.name}}</span>
               <div :id='"comic" + title_index' class="collapse hide" :data-parent="'#' + comicTitle.name">
                 <span v-for='(chapter, comic_index) in comicTitle.chapters' :id='"comic" + title_index + "_" + comic_index'
-                @click='readChapter(title_index, comic_index, chapter.isdir, "comic" + title_index + "_" + comic_index)'>{{chapter.name}}</span>
+                @click='readChapter(title_index, comic_index)'>{{chapter.name}}</span>
               </div>
             </div>
           </div>
@@ -72,7 +72,7 @@
         <table border="3px" cellpadding='0' cellspacing='0' style="height: 100%;left: 100px;position: absolute;top: 0px;" id='division_table_w' class="division"></table>
       </div>
 
-      <div class="comic_content border border-primary" style="overflow: auto; max-height: 100%;">
+      <div class="comic_content border border-primary" id="comic_sceen" style="overflow: auto; max-height: 100%;">
         <div id='comic_slide' class="carousel">
           <div class='carousel-inner'>
             <div v-for="currentComic in currentComics">
@@ -86,7 +86,7 @@
               </div>
             </div>
           </div>
-          <a class="carousel-control-prev" href="#comic_slide" role='button' onclick="stopSlide(-1)" data-slide="prev">
+          <a class="carousel-control-prev" href="#comic_slide" role='button' onclick="stopSlide(-1)" data-slide="prev" id="focus_button">
             <!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="sr-only">Previous</span> -->
           </a>
