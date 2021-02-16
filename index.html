@@ -58,7 +58,16 @@
       <div class="comic_list" style="overflow: auto;">
         <div class="accordion" id='comicAccordion'>
           <div class="card">
-            <button id='readBtn' onclick="read_file()" class="btn btn-secondary">打开文件夹</button>
+            <div class="container" style="background-color: #5a6268;">
+              <div class="row">
+                <div class="col">
+                  <button id='readBtn' onclick="read_file()" class="btn btn-secondary" style="width: 100%;">打开</button>
+                </div>
+                <div class="col">
+                  <button id='readBtn' onclick="save_read()" class="btn btn-secondary" style="width: 100%;">保存</button>
+                </div>
+              </div>
+            </div>
             <div v-for='(comicTitle, title_index) in comicTitles'>
               <span :id='comicTitle.name' class="comic_title" data-toggle="collapse" style="background-color: #fabe19;" 
               :data-target="'#comic' + title_index" @click='sortByTime(title_index, comicTitle.sorted)'>{{comicTitle.name}}</span>

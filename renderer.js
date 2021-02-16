@@ -21,8 +21,14 @@ initMyUI = function(){
 
 initData = function(){
     initMyUI();
-    if(localStorage.length === 0){
+    let app_used = true;
+    if(localStorage.length < 2){
         localStorage.setItem('comics', JSON.stringify({}));
+        localStorage.setItem('lastdata', JSON.stringify({
+            comic_id:0,
+            chapter_id:0,
+            page_id:0
+        }));
     }
     let books = JSON.parse(localStorage['comics']);
     let last_data = JSON.parse(localStorage['lastdata']);
@@ -33,7 +39,12 @@ initData = function(){
     curComic = last_data['comic_id'];
     curChapter = last_data['chapter_id'];
     curPage = last_data['page_id'];
-    app.readChapter(curComic, curChapter);
+    if(curComic + curChapter + curPage === 0){
+        app_used = false;
+    }
+    if(app_used){
+        app.readChapter(curComic, curChapter);
+    }
 }
 
 // 注册键盘事件,进行选中图片的切换
@@ -54,13 +65,17 @@ ipcRenderer.on('control', (event, message)=>{
     }
 })
 
-ipcRenderer.on('close-window', (event, message)=>{
+let save_read = function(){
     let final_data = {
         comic_id:curComic,
         chapter_id:curChapter,
         page_id:curPage
     };
     localStorage['lastdata'] = JSON.stringify(final_data);
+}
+
+ipcRenderer.on('close-window', (event, message)=>{
+    save_read();
 })
 
 

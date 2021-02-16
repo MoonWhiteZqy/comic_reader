@@ -28,8 +28,12 @@ npm install
 # Run this app
 electron .
 
-# Release this app
-npm start
+# Build this app
+# First time need only
+npx @electron-forge/cli import
+
+# each time
+npm run make
 ```
 
 Note: Your comic folder shoule be like this:
