@@ -1,7 +1,6 @@
 const fs = require('fs')
 let Vue = require('./vue.js')
 const {ipcRenderer} = require('electron');
-const { time } = require('console');
 
 
 let comicCount = 0;
@@ -10,18 +9,21 @@ let curComic = 0;
 let curChapter = 0;
 let curPage = 0;
 let comic_chosen = 0;
+let chapter_by_left = false;
 
-// 初始化css
-initMyUI = function(){
-    let leftPx = 200;
+// 设置左边边框宽度
+setLeftUIWidth = function(leftPx){
+    let totalPx = document.body.clientWidth;
     $('.comic_content').offset({left:leftPx});
+    // $('.comic_content').width(totalPx - leftPx);
     $('.comic_list').width(leftPx);
     $('#division_table_w').offset({left:leftPx - 3});
 }
 
 initData = function(){
-    initMyUI();
+    setLeftUIWidth(200);
     let app_used = true;
+    // 还没初始化，进行初始化
     if(localStorage.length < 2){
         localStorage.setItem('comics', JSON.stringify({}));
         localStorage.setItem('lastdata', JSON.stringify({
@@ -32,6 +34,7 @@ initData = function(){
     }
     let books = JSON.parse(localStorage['comics']);
     let last_data = JSON.parse(localStorage['lastdata']);
+    // 读取打开过的漫画记录
     for(let key in books){
         app.openBaseFolder(books[key]);
     }
@@ -43,6 +46,7 @@ initData = function(){
         app_used = false;
     }
     if(app_used){
+        chapter_by_left = false;
         app.readChapter(curComic, curChapter);
     }
 }
@@ -65,6 +69,7 @@ ipcRenderer.on('control', (event, message)=>{
     }
 })
 
+// 保存阅读结束位置，在关闭时/点击按钮是启用
 let save_read = function(){
     let final_data = {
         comic_id:curComic,
@@ -74,6 +79,11 @@ let save_read = function(){
     localStorage['lastdata'] = JSON.stringify(final_data);
 }
 
+// 隐藏左侧工具栏
+let hide_left = function(){
+    setLeftUIWidth(0);
+}
+
 ipcRenderer.on('close-window', (event, message)=>{
     save_read();
 })
@@ -81,6 +91,7 @@ ipcRenderer.on('close-window', (event, message)=>{
 
 // 打开文件夹窗口功能
 read_file = function(){
+    // 通过进程间通信，获取main.js打开的文件夹信息
     ipcRenderer.send('open-directory-dialog', 'openDirectory');
     ipcRenderer.once('selectedItem', function(event, path){
         if(path.length > 0){
@@ -128,6 +139,7 @@ let changeChapter = function(direction){
     }
     let nextChapterId = 'comic' + baseComic.index + '_' + newChapter;
     // 模拟章节的选择
+    chapter_by_left = false;
     app.readChapter(curComic, newChapter, nextChapterId);
 }
 
@@ -175,12 +187,15 @@ let appendFolder = function(files){
         //         time:data.birthtimeMs
         //     })
         // })
+
+        // 这里采用同步读写文件，保证后续操作基于已经读写完毕的文件
         let filedata = fs.statSync(base + files[i]);
         folderList.push({
             name:files[i],
             time:filedata.birthtimeMs
         })
     }
+    // 根据文件夹创建时间进行排序
     folderList.sort((a, b)=>{return a.time - b.time;});
     app.comicTitles[comicCount]['chapters'] = folderList;
 }
@@ -272,9 +287,13 @@ let app = new Vue({
             if(curPage === -1){
                 curPage = comicPaths.length - 1;
             }
+            if(chapter_by_left){
+                curPage = 0;
+            }
             app.setCurrentComic(chapterPath, comicPaths);
             $('#web_title').text('正在阅读:' + baseInfo.name);
             comic_chosen = 1;
+            chapter_by_left = true;
         },
         setCurrentComic:function(chapterPath, comicFileNames){
             app.currentComics = [];
