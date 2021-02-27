@@ -59,6 +59,7 @@
   </head>
   <body>
     <div id='app'>
+      <!-- 左边的控制按钮和列表 -->
       <div class="comic_list" style="overflow: auto;">
         <div class="accordion" id='comicAccordion'>
           <div class="card">
@@ -88,6 +89,7 @@
         <table border="3px" cellpadding='0' cellspacing='0' style="height: 100%;left: 100px;position: absolute;top: 0px;" id='division_table_w' class="division"></table>
       </div>
 
+      <!-- 右边区块，展示图片用 -->
       <div class="comic_content border border-primary" id="comic_sceen" style="overflow: auto; max-height: 100%;">
         <!-- <nav class="navbar navbar-dark bg-dark">
           <a class="navbar-brand" href="#">Navbar</a>
@@ -146,18 +148,18 @@
             <span class="sr-only">Next</span> -->
           </a>
         </div>
-        <!-- 错误弹框 -->
+        <!-- 消息弹框 -->
         <div class="position-fixed bottom-0 right-0 p-3" style="z-index: 5; right: 0; bottom: 0;">
-          <div id="errToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+          <div id="msgToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
             <div class="toast-header">
               <!-- <img src="..." class="rounded mr-2" alt="..."> -->
-              <strong class="mr-auto">错误</strong>
+              <strong class="mr-auto" id='msg_title'>错误</strong>
               <small>刚刚</small>
               <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="toast-body">
+            <div class="toast-body" id='msg_body'>
               当前文件夹已经存在记录.
             </div>
           </div>

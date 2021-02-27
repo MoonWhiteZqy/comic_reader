@@ -10,10 +10,6 @@ function createWindow () {
     width: 800,
     height: 600,
     show:false,
-    // width:screen.getPrimaryDisplay().workAreaSize.width,
-    // height:screen.getPrimaryDisplay().workAreaSize.height,
-    // fullscreen:true,
-    // frame:false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration:true
@@ -42,6 +38,18 @@ app.whenReady().then(() => {
 
   globalShortcut.register('Left', ()=>{
     mainWindow.webContents.send('control', 'Left');
+  })
+
+  globalShortcut.register('A', ()=>{
+    mainWindow.webContents.send('control', 'Last');
+  })
+
+  globalShortcut.register('D', ()=>{
+    mainWindow.webContents.send('control', 'Next');
+  })
+
+  globalShortcut.register('S', ()=>{
+    mainWindow.webContents.send('control', "Show");
   })
   
   app.on('activate', function () {

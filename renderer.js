@@ -51,7 +51,7 @@ initData = function(){
     }
 }
 
-// 注册键盘事件,进行选中图片的切换
+// 注册键盘事件,进行快捷键操作
 ipcRenderer.on('control', (event, message)=>{
     if(comic_chosen === 0){
         console.log('No comic chosen')
@@ -59,17 +59,37 @@ ipcRenderer.on('control', (event, message)=>{
     }
     // 进行页面切换
     if(message === 'Right'){
+        // 向后翻页
         stopSlide(1);
     }
     else if(message === 'Left'){
+        // 向前翻页
         stopSlide(-1);
+    }
+    else if(message === 'Last'){
+        // 看前一章节
+        switch2near_chapter(-1);
+    }
+    else if(message === 'Next'){
+        // 跳转下一章节
+        switch2near_chapter(1);
+    }
+    else if (message === 'Show'){
+        // 显示隐藏的左边区域
+        setLeftUIWidth(200);
     }
     else{
         console.error('Unknown message by control');
     }
 })
 
-// 保存阅读结束位置，在关闭时/点击按钮是启用
+//直接跳转到相邻章节首页
+let switch2near_chapter = function(dir){
+    curPage = 0;
+    changeChapter(dir);
+}
+
+// 保存阅读结束位置，在关闭窗口时/点击保存按钮时被调用
 let save_read = function(){
     let final_data = {
         comic_id:curComic,
@@ -84,6 +104,7 @@ let hide_left = function(){
     setLeftUIWidth(0);
 }
 
+// 关闭窗口时保存当前阅读的进度，但是不知道为什么有时候失效
 ipcRenderer.on('close-window', (event, message)=>{
     save_read();
 })
@@ -98,7 +119,7 @@ read_file = function(){
             let i;
             for(i = 0; i < app.comicTitles.length; i++){
                 if(app.comicTitles[i].ospath == path[0]){
-                    $('#errToast').toast('show');
+                    $('#msgToast').toast('show');
                     return ;
                 }
             }
@@ -178,16 +199,6 @@ let appendFolder = function(files){
     let base = app.comicTitles[comicCount]['ospath'] + '\\';
     let folderList = [];
     for(let i = 0; i < files.length; i++){
-        // fs.stat(base + files[i], function(err, data){
-        //     if(err){
-        //         console.log(err);
-        //     }
-        //     folderList.push({
-        //         name:files[i],
-        //         time:data.birthtimeMs
-        //     })
-        // })
-
         // 这里采用同步读写文件，保证后续操作基于已经读写完毕的文件
         let filedata = fs.statSync(base + files[i]);
         folderList.push({
@@ -253,18 +264,6 @@ let app = new Vue({
                 localStorage['comics'] = JSON.stringify(logComics);
                 return console.error('文件夹打开失败');
             }
-            // fs.readdir(path, function(err, filedirs){
-            //     if(err){
-            //         // 打开文件夹失败，删除记录
-            //         delete logComics[comicName];
-            //         app.comicTitles.pop();
-            //         localStorage['comics'] = JSON.stringify(logComics);
-            //         return console.error(err);
-            //     }
-            //     appendFolder(filedirs);
-            //     app.comicTitles[comicCount]['chapters'].sort(function(a,b){return a.time - b.time;})
-            //     comicCount++;
-            // })
         },
         // 按照创建时间对章节名进行排序，似乎会有异步问题出现导致sort失效
         sortByTime:function(index){
@@ -284,6 +283,7 @@ let app = new Vue({
             comicPaths = fs.readdirSync(chapterPath);
             changeFocus(curChapterId);
             comicPaths.sort(sortByIndex);
+            // curPage为-1表示从当前章节向前面章节回退一页，为了方便阅读重定位到前一章节的最后一页
             if(curPage === -1){
                 curPage = comicPaths.length - 1;
             }
@@ -297,11 +297,12 @@ let app = new Vue({
         },
         setCurrentComic:function(chapterPath, comicFileNames){
             app.currentComics = [];
-            let comic_len = comicFileNames.length
+            let comic_len = comicFileNames.length;
             for(let i = 0; i < comic_len; i++){
                 // 需要在添加时确定active属性，用于适配bootsreap的轮播组件
                 app.currentComics.push({path:chapterPath + '\\' + comicFileNames[i], isactive:false});
             }
+            // 对于当前页面，激活属性，即展示图片
             app.currentComics[curPage].isactive = true;
         }
     }
