@@ -15,9 +15,15 @@ let chapter_by_left = false;
 setLeftUIWidth = function(leftPx){
     let totalPx = document.body.clientWidth;
     $('.comic_content').offset({left:leftPx});
-    // $('.comic_content').width(totalPx - leftPx);
+    $('.comic_content').width(totalPx - leftPx);
     $('.comic_list').width(leftPx);
     $('#division_table_w').offset({left:leftPx - 3});
+}
+
+let messageToast = function(msg_title, msg_body){
+    $('#msgToast').toast('show');
+    $('#msg_title').text(msg_title);
+    $('#msg_body').text(msg_body);
 }
 
 initData = function(){
@@ -48,6 +54,7 @@ initData = function(){
     if(app_used){
         chapter_by_left = false;
         app.readChapter(curComic, curChapter);
+        messageToast('消息', '读取到上次结束位置.');
     }
 }
 
@@ -78,6 +85,10 @@ ipcRenderer.on('control', (event, message)=>{
         // 显示隐藏的左边区域
         setLeftUIWidth(200);
     }
+    else if(message === 'Save'){
+        // 保存阅读进度
+        save_read();
+    }
     else{
         console.error('Unknown message by control');
     }
@@ -97,11 +108,14 @@ let save_read = function(){
         page_id:curPage
     };
     localStorage['lastdata'] = JSON.stringify(final_data);
+    messageToast('通知', '进度保存成功');
 }
 
 // 隐藏左侧工具栏
 let hide_left = function(){
     setLeftUIWidth(0);
+    $('#hideBtn').blur();
+    messageToast('提醒', '隐藏成功，按下s取消隐藏');
 }
 
 // 关闭窗口时保存当前阅读的进度，但是不知道为什么有时候失效
@@ -119,7 +133,7 @@ read_file = function(){
             let i;
             for(i = 0; i < app.comicTitles.length; i++){
                 if(app.comicTitles[i].ospath == path[0]){
-                    $('#msgToast').toast('show');
+                    messageToast('错误', '当前文件夹已经存在记录.');
                     return ;
                 }
             }

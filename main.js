@@ -51,6 +51,10 @@ app.whenReady().then(() => {
   globalShortcut.register('S', ()=>{
     mainWindow.webContents.send('control', "Show");
   })
+
+  globalShortcut.register('X', ()=>{
+    mainWindow.webContents.send('control', 'Save');
+  })
   
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
